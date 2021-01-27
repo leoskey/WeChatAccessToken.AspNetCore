@@ -7,6 +7,7 @@ namespace WeChatAccessToken.Web.Services
     {
         Task<AccessTokenDto> GetByAppIdAsync(string appId);
         Task RemoveAsync(string appId);
-        Task ForceUpdateAccessTokenAsync(string wechatAppId);
+        Task ForceUpdateAccessTokenAsync(string appId);
+        string GetKey(string appId);
     }
 }

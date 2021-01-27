@@ -33,24 +33,21 @@ namespace WeChatAccessToken.Web.HostServices
         {
             while (true)
             {
-                if (cancellationToken.IsCancellationRequested)
+                var weChats = _options.CurrentValue.WeChats;
+                foreach (var wechat in weChats)
                 {
-                    return;
-                }
-
-                var wechats = _options.CurrentValue.WeChats;
-                foreach (var wechat in wechats)
-                {
-                    var result = await _weChatApplicationService.GetByAppIdAsync(wechat.AppId);
-                    if (result != null)
+                    var key = _weChatApplicationService.GetKey(wechat.AppId);
+                    var accessToken = await _cache.GetStringAsync(key, token: cancellationToken);
+                    if (string.IsNullOrWhiteSpace(accessToken))
                     {
-                        _logger.LogInformation($"{wechat.AppId}无需更新");
-                        continue;
+                        _logger.LogInformation($"{DateTime.Now}:{wechat.AppId}:更新中");
+                        await _weChatApplicationService.ForceUpdateAccessTokenAsync(wechat.AppId);
+                        _logger.LogInformation($"{DateTime.Now}:{wechat.AppId}:更新完毕");
                     }
-
-                    _logger.LogInformation($"{wechat.AppId}更新中");
-                    await _weChatApplicationService.ForceUpdateAccessTokenAsync(wechat.AppId);
-                    _logger.LogInformation($"{wechat.AppId}更新完毕");
+                    else
+                    {
+                        _logger.LogInformation($"{DateTime.Now}:{wechat.AppId}:无需更新");
+                    }
 
                     await Task.Delay(1000, cancellationToken);
                 }

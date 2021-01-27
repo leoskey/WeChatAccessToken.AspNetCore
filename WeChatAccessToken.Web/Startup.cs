@@ -32,7 +32,7 @@ namespace WeChatAccessToken.Web
             services.AddDistributedMemoryCache();
             services.AddHttpClient();
             services.AddSingleton<IWeChatApplicationService, WeChatApplicationService>();
-            // services.AddHostedService<WeChatHostedService>();
+            services.AddHostedService<WeChatHostedService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

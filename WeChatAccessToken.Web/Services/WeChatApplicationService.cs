@@ -32,7 +32,7 @@ namespace WeChatAccessToken.Web.Services
         }
 
         /// <summary>
-        ///     获取 access_token
+        /// 获取 access_token
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
@@ -67,7 +67,7 @@ namespace WeChatAccessToken.Web.Services
         }
 
         /// <summary>
-        ///     删除缓存
+        /// 删除缓存
         /// </summary>
         /// <param name="appId"></param>
         public async Task RemoveAsync(string appId)
@@ -93,7 +93,7 @@ namespace WeChatAccessToken.Web.Services
         }
 
         /// <summary>
-        ///     申请 accessToken
+        /// 申请 accessToken
         /// </summary>
         /// <param name="app"></param>
         /// <returns></returns>
@@ -110,11 +110,11 @@ namespace WeChatAccessToken.Web.Services
         }
 
         /// <summary>
-        ///     获取缓存 key
+        /// 获取缓存 key
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        private string GetKey(string appId)
+        public string GetKey(string appId)
         {
             var app = GetWeChat(appId);
             return $"wechat:access_token:{app.AppId}:{app.AppSecret}";
