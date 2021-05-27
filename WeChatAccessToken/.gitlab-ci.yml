@@ -1,0 +1,15 @@
+image: docker:dind
+
+services:
+  - docker:dind
+
+stages:
+  - build_docker
+
+before_script:
+  - docker info
+
+build_docker_job:
+  stage: build_docker
+  script:
+    - docker build -f ./WeChatAccessToken/Dockerfile -t leoskey/wechat-accesstoken:${CI_COMMIT_REF_NAME} .
