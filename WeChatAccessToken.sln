@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeChatAccessToken.Web", "WeChatAccessToken.Web\WeChatAccessToken.Web.csproj", "{6F4F4278-2AC3-4815-8503-250312FCDB48}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeChatAccessToken", "WeChatAccessToken\WeChatAccessToken.csproj", "{6F4F4278-2AC3-4815-8503-250312FCDB48}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

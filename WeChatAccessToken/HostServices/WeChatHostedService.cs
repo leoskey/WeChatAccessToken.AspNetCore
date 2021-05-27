@@ -10,7 +10,7 @@ using WeChatAccessToken.Web.Services;
 
 namespace WeChatAccessToken.Web.HostServices
 {
-    public class WeChatHostedService : IHostedService
+    public class WeChatHostedService : BackgroundService
     {
         private readonly ILogger<WeChatHostedService> _logger;
         private readonly IOptionsMonitor<AppSettings> _options;
@@ -29,34 +29,20 @@ namespace WeChatAccessToken.Web.HostServices
             _weChatApplicationService = weChatApplicationService;
         }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             while (true)
             {
                 var weChats = _options.CurrentValue.WeChats;
                 foreach (var wechat in weChats)
                 {
-                    var key = _weChatApplicationService.GetKey(wechat.AppId);
-                    var accessToken = await _cache.GetStringAsync(key, token: cancellationToken);
-                    if (string.IsNullOrWhiteSpace(accessToken))
-                    {
-                        _logger.LogInformation($"{DateTime.Now}:{wechat.AppId}:更新中");
-                        await _weChatApplicationService.ForceUpdateAccessTokenAsync(wechat.AppId);
-                        _logger.LogInformation($"{DateTime.Now}:{wechat.AppId}:更新完毕");
-                    }
-                    else
-                    {
-                        _logger.LogInformation($"{DateTime.Now}:{wechat.AppId}:无需更新");
-                    }
+                    _logger.LogInformation($"更新中:{wechat.AppId}");
+                    await _weChatApplicationService.ResetAccessTokenAsync(wechat.AppId);
+                    _logger.LogInformation($"更新完毕:{wechat.AppId}");
 
-                    await Task.Delay(1000, cancellationToken);
+                    await Task.Delay(7000 * 1000, stoppingToken);
                 }
             }
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
         }
     }
 }

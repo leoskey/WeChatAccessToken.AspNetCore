@@ -16,11 +16,11 @@ namespace WeChatAccessToken.Web.Services
     {
         private readonly IDistributedCache _cache;
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly ILogger<WeChatController> _logger;
+        private readonly ILogger<TokenController> _logger;
         private readonly IOptionsMonitor<AppSettings> _optionsMonitor;
 
         public WeChatApplicationService(
-            ILogger<WeChatController> logger,
+            ILogger<TokenController> logger,
             IDistributedCache cache,
             IOptionsMonitor<AppSettings> optionsMonitor,
             IHttpClientFactory httpClientFactory)
@@ -36,44 +36,39 @@ namespace WeChatAccessToken.Web.Services
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        public async Task<AccessTokenDto> GetByAppIdAsync(string appId)
+        public async Task<AccessTokenDto> GetAccessTokenByAppIdAsync(string appId)
         {
-            var key = GetKey(appId);
+            var cacheKey = GetCacheKey(appId);
 
-            var accessToken = await _cache.GetStringAsync(key);
-            if (!string.IsNullOrWhiteSpace(accessToken)) return new AccessTokenDto(accessToken);
+            var accessToken = await _cache.GetStringAsync(cacheKey);
+            if (!string.IsNullOrWhiteSpace(accessToken))
+            {
+                return new AccessTokenDto(accessToken);
+            }
 
-            if (Monitor.TryEnter(key))
-                try
-                {
-                    var app = GetWeChat(appId);
-                    var accessTokenResult = await GetAccessTokenAsync(app);
-                    await _cache.SetStringAsync(key, accessTokenResult.access_token, new DistributedCacheEntryOptions
-                    {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(accessTokenResult.expires_in - 10)
-                    });
-                    return new AccessTokenDto(accessToken);
-                }
-                finally
-                {
-                    Monitor.Exit(key);
-                }
+            throw new UserFriendlyException("未获取access token");
 
-            Monitor.Wait(key);
-            accessToken = await _cache.GetStringAsync(key);
-            return !string.IsNullOrWhiteSpace(accessToken)
-                ? new AccessTokenDto(accessToken)
-                : throw new UserFriendlyException("internal_error", "获取失败");
-        }
-
-        /// <summary>
-        /// 删除缓存
-        /// </summary>
-        /// <param name="appId"></param>
-        public async Task RemoveAsync(string appId)
-        {
-            var key = GetKey(appId);
-            await _cache.RemoveAsync(key);
+            // if (Monitor.TryEnter(key))
+            //     try
+            //     {
+            //         var app = GetWeChat(appId);
+            //         var accessTokenResult = await GetAccessTokenAsync(app);
+            //         await _cache.SetStringAsync(key, accessTokenResult.access_token, new DistributedCacheEntryOptions
+            //         {
+            //             AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(accessTokenResult.expires_in - 10)
+            //         });
+            //         return new AccessTokenDto(accessToken);
+            //     }
+            //     finally
+            //     {
+            //         Monitor.Exit(key);
+            //     }
+            //
+            // Monitor.Wait(key);
+            // accessToken = await _cache.GetStringAsync(key);
+            // return !string.IsNullOrWhiteSpace(accessToken)
+            //     ? new AccessTokenDto(accessToken)
+            //     : throw new UserFriendlyException("internal_error", "获取失败");
         }
 
         /// <summary>
@@ -81,15 +76,16 @@ namespace WeChatAccessToken.Web.Services
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        public async Task ForceUpdateAccessTokenAsync(string appId)
+        public async Task<AccessTokenDto> ResetAccessTokenAsync(string appId)
         {
-            var app = GetWeChat(appId);
-            var key = GetKey(appId);
-            var accessTokenResult = await GetAccessTokenAsync(app);
-            await _cache.SetStringAsync(key, accessTokenResult.access_token, new DistributedCacheEntryOptions
+            var weChatOption = GetWeChatOption(appId);
+            var cacheKey = GetCacheKey(appId);
+            var accessTokenResult = await GetAccessTokenAsync(weChatOption);
+            await _cache.SetStringAsync(cacheKey, accessTokenResult.access_token, new DistributedCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(accessTokenResult.expires_in - 10)
             });
+            return await GetAccessTokenByAppIdAsync(appId);
         }
 
         /// <summary>
@@ -103,10 +99,13 @@ namespace WeChatAccessToken.Web.Services
             var client = _httpClientFactory.CreateClient();
             var result = await client.GetStringAsync(
                 $"https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={app.AppId}&secret={app.AppSecret}");
-            var json = JsonConvert.DeserializeObject<AccessTokenResult>(result);
-            if (json.errcode != 0) throw new UserFriendlyException("wechat_error", json.errmsg);
+            var accessTokenResult = JsonConvert.DeserializeObject<AccessTokenResult>(result);
+            if (accessTokenResult.errcode != 0)
+            {
+                throw new UserFriendlyException(accessTokenResult.errmsg);
+            }
 
-            return json;
+            return accessTokenResult;
         }
 
         /// <summary>
@@ -114,24 +113,24 @@ namespace WeChatAccessToken.Web.Services
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        public string GetKey(string appId)
+        public string GetCacheKey(string appId)
         {
-            var app = GetWeChat(appId);
-            return $"wechat:access_token:{app.AppId}:{app.AppSecret}";
+            var app = GetWeChatOption(appId);
+            return $"wechat:access_token:{app.AppId}";
         }
 
         /// <summary>
-        ///     获取 wechat 配置
+        /// 获取 wechat 配置
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
         /// <exception cref="UserFriendlyException"></exception>
-        private WeChat GetWeChat(string appId)
+        private WeChat GetWeChatOption(string appId)
         {
             appId = appId.Trim();
             var app = _optionsMonitor.CurrentValue.WeChats
                 .FirstOrDefault(t => t.AppId.Equals(appId));
-            if (app == null) throw new UserFriendlyException("invalid_appid", "无效的 appid");
+            if (app == null) throw new UserFriendlyException("无效的 appid");
 
             return app;
         }

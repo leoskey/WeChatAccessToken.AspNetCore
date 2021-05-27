@@ -7,35 +7,35 @@ namespace WeChatAccessToken.Web.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeChatController : ControllerBase
+    public class TokenController : ControllerBase
     {
         private readonly IWeChatApplicationService _weChatApplicationService;
 
-        public WeChatController(
+        public TokenController(
             IWeChatApplicationService weChatApplicationService)
         {
             _weChatApplicationService = weChatApplicationService;
         }
 
         /// <summary>
-        ///     获取 access_token
+        /// 获取 access_token
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        [HttpGet("{appId}/token")]
+        [HttpGet("{appId}")]
         public async Task<AccessTokenDto> GetByAppIdAsync(string appId)
         {
-            return await _weChatApplicationService.GetByAppIdAsync(appId);
+            return await _weChatApplicationService.GetAccessTokenByAppIdAsync(appId);
         }
 
         /// <summary>
-        ///     删除缓存
+        /// 重置 access_token
         /// </summary>
         /// <param name="appId"></param>
-        [HttpPost("{appId}/clear")]
-        public async Task Clear(string appId)
+        [HttpPost("{appId}/reset")]
+        public async Task<AccessTokenDto> Reset(string appId)
         {
-            await _weChatApplicationService.RemoveAsync(appId);
+            return await _weChatApplicationService.ResetAccessTokenAsync(appId);
         }
     }
 }

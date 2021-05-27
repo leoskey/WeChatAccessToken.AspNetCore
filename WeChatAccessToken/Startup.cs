@@ -25,7 +25,7 @@ namespace WeChatAccessToken.Web
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "WeChatAccessToken.Web", Version = "v1"});
+                c.SwaggerDoc("v1", new OpenApiInfo {Title = "WeChatAccessToken", Version = "v1"});
             });
 
             services.Configure<AppSettings>(Configuration);
@@ -42,10 +42,8 @@ namespace WeChatAccessToken.Web
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WeChatAccessToken.Web v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WeChatAccessToken v1"));
             }
-
-            // app.UseHttpsRedirection();
 
             app.UseRouting();
 
