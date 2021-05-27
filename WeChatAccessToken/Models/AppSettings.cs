@@ -4,6 +4,7 @@ namespace WeChatAccessToken.Web.Models
 {
     public class AppSettings
     {
+        public string ApiToken { get; set; }
         public List<WeChat> WeChats { get; set; }
     }
 
