@@ -1,7 +1,6 @@
 using System;
 using System.Linq;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging;
@@ -89,6 +88,17 @@ namespace WeChatAccessToken.Web.Services
         }
 
         /// <summary>
+        /// 获取缓存 key
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <returns></returns>
+        public string GetCacheKey(string appId)
+        {
+            var app = GetWeChatOption(appId);
+            return $"wechat:access_token:{app.AppId}";
+        }
+
+        /// <summary>
         /// 申请 accessToken
         /// </summary>
         /// <param name="app"></param>
@@ -106,17 +116,6 @@ namespace WeChatAccessToken.Web.Services
             }
 
             return accessTokenResult;
-        }
-
-        /// <summary>
-        /// 获取缓存 key
-        /// </summary>
-        /// <param name="appId"></param>
-        /// <returns></returns>
-        public string GetCacheKey(string appId)
-        {
-            var app = GetWeChatOption(appId);
-            return $"wechat:access_token:{app.AppId}";
         }
 
         /// <summary>
