@@ -1,13 +1,14 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using WeChatAccessToken.Web.Models;
-using WeChatAccessToken.Web.Services;
+using WeChatAccessToken.AspNetCore.Models;
+using WeChatAccessToken.AspNetCore.Services;
+using WeChatAccessToken.Exceptions;
 
 namespace WeChatAccessToken.Web.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("[controller]/{appId}")]
     public class TokenController : ControllerBase
     {
         private readonly IOptionsMonitor<AppSettings> _optionsMonitor;
@@ -26,8 +27,7 @@ namespace WeChatAccessToken.Web.Controllers
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
-        [HttpGet("{appId}")]
-        public async Task<AccessTokenDto> GetByAppIdAsync([FromRoute] string appId, [FromQuery] string token)
+        public async Task<AccessTokenResult> GetByAppIdAsync([FromRoute] string appId, [FromQuery] string token)
         {
             if (!_optionsMonitor.CurrentValue.ApiToken.Equals(token))
             {
@@ -41,8 +41,8 @@ namespace WeChatAccessToken.Web.Controllers
         /// 重置 access_token
         /// </summary>
         /// <param name="appId"></param>
-        [HttpPost("{appId}/reset")]
-        public async Task<AccessTokenDto> Reset([FromRoute] string appId, [FromQuery] string token)
+        [HttpPost("reset")]
+        public async Task<AccessTokenResult> Reset([FromRoute] string appId, [FromQuery] string token)
         {
             if (!_optionsMonitor.CurrentValue.ApiToken.Equals(token))
             {

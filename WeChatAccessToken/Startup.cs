@@ -5,9 +5,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using WeChatAccessToken.Web.HostServices;
-using WeChatAccessToken.Web.Models;
-using WeChatAccessToken.Web.Services;
+using WeChatAccessToken.AspNetCore;
+using WeChatAccessToken.AspNetCore.Models;
+using WeChatAccessToken.Exceptions;
+using WeChatAccessToken.Extensions;
 
 namespace WeChatAccessToken.Web
 {
@@ -30,9 +31,9 @@ namespace WeChatAccessToken.Web
             });
 
             services.Configure<AppSettings>(Configuration);
-            services.AddHttpClient();
-            services.AddSingleton<IWeChatApplicationService, WeChatApplicationService>();
-            services.AddHostedService<WeChatHostedService>();
+
+            services.Configure<WeChatServiceOptions>(Configuration);
+            services.AddWeChatAccessTokenService();
 
             services.AddDistributedRedisCache(options =>
             {
@@ -47,31 +48,18 @@ namespace WeChatAccessToken.Web
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WeChatAccessToken v1"));
             }
 
-            app.Use(async (context, next) =>
-            {
-                try
-                {
-                    await next();
-                }
-                catch (UserFriendlyException e)
-                {
-                    context.Response.StatusCode = StatusCodes.Status400BadRequest;
-                    await context.Response.WriteAsJsonAsync(new
-                    {
-                        e.Message
-                    });
-                }
-            });
+            app.UseGlobalExceptionHandler();
 
             app.UseRouting();
 
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WeChatAccessToken v1"));
         }
     }
 }

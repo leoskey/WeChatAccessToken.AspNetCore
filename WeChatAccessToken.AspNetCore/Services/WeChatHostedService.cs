@@ -4,20 +4,19 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using WeChatAccessToken.Web.Models;
-using WeChatAccessToken.Web.Services;
+using WeChatAccessToken.AspNetCore.Models;
 
-namespace WeChatAccessToken.Web.HostServices
+namespace WeChatAccessToken.AspNetCore.Services
 {
     public class WeChatHostedService : BackgroundService
     {
         private readonly ILogger<WeChatHostedService> _logger;
-        private readonly IOptionsMonitor<AppSettings> _options;
+        private readonly IOptionsMonitor<WeChatServiceOptions> _options;
         private readonly IWeChatApplicationService _weChatApplicationService;
 
         public WeChatHostedService(
             ILogger<WeChatHostedService> logger,
-            IOptionsMonitor<AppSettings> options,
+            IOptionsMonitor<WeChatServiceOptions> options,
             IWeChatApplicationService weChatApplicationService)
         {
             _logger = logger;

@@ -1,6 +1,6 @@
 using System;
 
-namespace WeChatAccessToken.Web.Models
+namespace WeChatAccessToken.Exceptions
 {
     public class UserFriendlyException : Exception
     {

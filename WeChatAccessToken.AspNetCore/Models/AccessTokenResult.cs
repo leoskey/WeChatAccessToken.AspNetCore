@@ -1,4 +1,4 @@
-namespace WeChatAccessToken.Web.Models
+namespace WeChatAccessToken.AspNetCore.Models
 {
     public class AccessTokenResult
     {
