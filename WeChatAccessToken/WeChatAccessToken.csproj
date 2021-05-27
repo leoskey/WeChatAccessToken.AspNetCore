@@ -13,10 +13,4 @@
         <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Content Include="..\.gitignore">
-        <Link>.gitignore</Link>
-      </Content>
-    </ItemGroup>
-
 </Project>
