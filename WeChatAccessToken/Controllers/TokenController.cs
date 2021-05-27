@@ -43,7 +43,6 @@ namespace WeChatAccessToken.Web.Controllers
         /// </summary>
         /// <param name="appId"></param>
         [HttpPost("{appId}/reset")]
-        [Authorize]
         public async Task<AccessTokenDto> Reset([FromRoute] string appId, [FromQuery] string token)
         {
             if (!_optionsMonitor.CurrentValue.ApiToken.Equals(token))

@@ -31,10 +31,15 @@ namespace WeChatAccessToken.Web
             });
 
             services.Configure<AppSettings>(Configuration);
-            services.AddDistributedMemoryCache();
             services.AddHttpClient();
             services.AddSingleton<IWeChatApplicationService, WeChatApplicationService>();
             services.AddHostedService<WeChatHostedService>();
+
+            services.AddDistributedRedisCache(options =>
+            {
+                options.Configuration = Configuration["Redis"];
+                options.InstanceName = "WeChatAccessToken:";
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
