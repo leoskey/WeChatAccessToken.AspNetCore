@@ -1,16 +1,14 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using WeChatAccessToken.AspNetCore;
 using WeChatAccessToken.AspNetCore.Models;
-using WeChatAccessToken.Exceptions;
 using WeChatAccessToken.Extensions;
 
-namespace WeChatAccessToken.Web
+namespace WeChatAccessToken
 {
     public class Startup
     {

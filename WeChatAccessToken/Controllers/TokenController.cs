@@ -5,7 +5,7 @@ using WeChatAccessToken.AspNetCore.Models;
 using WeChatAccessToken.AspNetCore.Services;
 using WeChatAccessToken.Exceptions;
 
-namespace WeChatAccessToken.Web.Controllers
+namespace WeChatAccessToken.Controllers
 {
     [ApiController]
     [Route("[controller]/{appId}")]
@@ -27,6 +27,7 @@ namespace WeChatAccessToken.Web.Controllers
         /// </summary>
         /// <param name="appId"></param>
         /// <returns></returns>
+        [HttpGet]
         public async Task<AccessTokenResult> GetByAppIdAsync([FromRoute] string appId, [FromQuery] string token)
         {
             if (!_optionsMonitor.CurrentValue.ApiToken.Equals(token))
