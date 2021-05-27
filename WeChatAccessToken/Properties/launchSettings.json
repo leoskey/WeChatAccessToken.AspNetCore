@@ -17,7 +17,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "WeChatAccessToken.Web": {
+    "WeChatAccessToken": {
       "commandName": "Project",
       "dotnetRunMessages": "true",
       "launchBrowser": false,
