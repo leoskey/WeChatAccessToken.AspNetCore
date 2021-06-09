@@ -33,7 +33,7 @@ namespace WeChatAccessToken
             services.Configure<WeChatServiceOptions>(Configuration);
             services.AddWeChatAccessTokenService();
 
-            services.AddDistributedRedisCache(options =>
+            services.AddStackExchangeRedisCache(options =>
             {
                 options.Configuration = Configuration["Redis"];
                 options.InstanceName = "WeChatAccessToken:";
