@@ -41,9 +41,9 @@ namespace WeChatAccessToken.AspNetCore.Services
                     {
                         _logger.LogError(e, $"更新异常:{wechat.AppId}");
                     }
-
-                    await Task.Delay(7000 * 1000, stoppingToken);
                 }
+
+                await Task.Delay(7000 * 1000, stoppingToken);
             }
         }
     }
