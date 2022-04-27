@@ -12,12 +12,14 @@ namespace WeChatAccessToken
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
+        public Startup(IConfiguration configuration, IHostEnvironment hostEnvironment)
         {
             Configuration = configuration;
+            HostEnvironment = hostEnvironment;
         }
 
         public IConfiguration Configuration { get; }
+        public IHostEnvironment HostEnvironment { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -25,7 +27,7 @@ namespace WeChatAccessToken
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo {Title = "WeChatAccessToken", Version = "v1"});
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WeChatAccessToken", Version = "v1" });
             });
 
             services.Configure<AppSettings>(Configuration);
@@ -33,11 +35,18 @@ namespace WeChatAccessToken
             services.Configure<WeChatServiceOptions>(Configuration);
             services.AddWeChatAccessTokenService();
 
-            services.AddStackExchangeRedisCache(options =>
+            if (HostEnvironment.IsDevelopment())
             {
-                options.Configuration = Configuration["Redis"];
-                options.InstanceName = "WeChatAccessToken:";
-            });
+                services.AddDistributedMemoryCache();
+            }
+            else
+            {
+                services.AddStackExchangeRedisCache(options =>
+                {
+                    options.Configuration = Configuration["Redis"];
+                    options.InstanceName = "WeChatAccessToken:";
+                });
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

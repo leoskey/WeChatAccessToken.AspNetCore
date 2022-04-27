@@ -54,6 +54,8 @@ namespace WeChatAccessToken.AspNetCore.Services
             var weChatOption = GetWeChatAccount(appId);
             var cacheKey = GetCacheKey(appId);
             var accessTokenResult = await GetAccessTokenAsync(weChatOption);
+            accessTokenResult.expiration_time =
+                DateTimeOffset.UtcNow.AddSeconds(accessTokenResult.expires_in).ToUnixTimeSeconds();
             await _cache.SetStringAsync(
                 cacheKey,
                 JsonConvert.SerializeObject(accessTokenResult),
@@ -72,9 +74,15 @@ namespace WeChatAccessToken.AspNetCore.Services
         /// <exception cref="WeChatException"></exception>
         private async Task<AccessTokenResult> GetAccessTokenAsync(WeChatAccount app)
         {
+            var requestUri = app.Type == WeChatAccountType.Official
+                ? $"https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={app.AppId}&secret={app.AppSecret}"
+                : app.Type == WeChatAccountType.WeWork
+                    ? $"https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={app.AppId}&corpsecret={app.AppSecret}"
+                    : throw new WeChatException($"{app.AppId}未设置正确的类型:{app.Type}");
+
             var client = _httpClientFactory.CreateClient();
             var result = await client.GetStringAsync(
-                $"https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid={app.AppId}&secret={app.AppSecret}");
+                requestUri);
             var accessTokenResult = JsonConvert.DeserializeObject<AccessTokenResult>(result);
             if (accessTokenResult.errcode != 0)
             {
@@ -104,14 +112,14 @@ namespace WeChatAccessToken.AspNetCore.Services
         private WeChatAccount GetWeChatAccount(string appId)
         {
             appId = appId.Trim();
-            var app = _optionsMonitor.CurrentValue.WeChats
+            var wechat = _optionsMonitor.CurrentValue.WeChats
                 .FirstOrDefault(t => t.AppId.Equals(appId));
-            if (app == null)
+            if (wechat != null)
             {
-                throw new WeChatException("无效的 appid");
+                return wechat;
             }
 
-            return app;
+            throw new WeChatException("无效的 appid");
         }
     }
 }
